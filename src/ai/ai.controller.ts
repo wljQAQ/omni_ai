@@ -3,8 +3,6 @@ import { Body, Controller, Get, Post, Res, Sse } from '@nestjs/common';
 import { Response } from 'express';
 
 import { AiService } from './ai.service';
-import { CreateAiDto } from './dto/create-ai.dto';
-import { UpdateAiDto } from './dto/update-ai.dto';
 
 @Controller('ai')
 export class AiController {
