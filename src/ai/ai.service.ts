@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { OpenaiModel } from './model/openai';
+import { DeepseekModel } from './model';
 import { getConvertOldCodePrompt } from './prompt';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class AiService {
   async *convertOldCodeStream(oldCode: string) {
     //创建model
 
-    const model = new OpenaiModel().createModel();
+    const model = new DeepseekModel().createModel();
 
     const prompt = getConvertOldCodePrompt();
 

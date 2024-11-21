@@ -3,7 +3,11 @@ import { ChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai';
 
 import type { BaseModelProvider } from './interface';
 
-export class OpenaiModel implements BaseModelProvider<ChatOpenAI<ChatOpenAICallOptions>> {
+/**
+ * deepseek全面兼容 openAI 所以直接用 langchain/openai
+ */
+
+export class DeepseekModel implements BaseModelProvider<ChatOpenAI<ChatOpenAICallOptions>> {
   model: ChatOpenAI<ChatOpenAICallOptions>;
 
   createModel() {
@@ -29,11 +33,11 @@ export class OpenaiModel implements BaseModelProvider<ChatOpenAI<ChatOpenAICallO
     });
 
     this.model = new ChatOpenAI({
-      modelName: 'gpt-4o-mini',
+      modelName: 'deepseek-chat',
       temperature: 0.2,
-      openAIApiKey: process.env.OPENAI_API_KEY,
+      openAIApiKey: process.env.DEEPSEEK_API_KEY,
       configuration: {
-        baseURL: 'https://api.zyai.online/v1'
+        baseURL: 'https://api.deepseek.com/v1'
       },
       callbacks: callbacks
     });
