@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { DeepseekModel } from './model';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+
+import { DeepseekModel, OllamaModel, QwenModel } from './model';
 import { getConvertOldCodePrompt } from './prompt';
 
 @Injectable()
@@ -15,7 +17,7 @@ export class AiService {
   async *convertOldCodeStream(oldCode: string) {
     //创建model
 
-    const model = new DeepseekModel().createModel();
+    const model = new QwenModel().createModel();
 
     const prompt = getConvertOldCodePrompt();
 
@@ -26,5 +28,10 @@ export class AiService {
     for await (const chunk of stream) {
       yield chunk;
     }
+  }
+
+  async chat(messages: Array<HumanMessage | SystemMessage>) {
+    const model = new QwenModel();
+    return model.chat(messages);
   }
 }

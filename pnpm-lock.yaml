@@ -11,6 +11,9 @@ importers:
       '@langchain/core':
         specifier: ^0.3.7
         version: 0.3.7(openai@4.67.1(zod@3.23.8))
+      '@langchain/ollama':
+        specifier: ^0.1.2
+        version: 0.1.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))
       '@langchain/openai':
         specifier: ^0.3.5
         version: 0.3.5(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))
@@ -29,18 +32,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^10.0.0
         version: 10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4)
-      '@types/node-fetch':
-        specifier: '2'
-        version: 2.6.11
-      crypto-js:
-        specifier: ^4.2.0
-        version: 4.2.0
       langchain:
         specifier: ^0.3.2
-        version: 0.3.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))(openai@4.67.1(zod@3.23.8))
-      node-fetch:
-        specifier: ^2.7.0
-        version: 2.7.0
+        version: 0.3.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))(@langchain/ollama@0.1.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8))))(openai@4.67.1(zod@3.23.8))
       reflect-metadata:
         specifier: ^0.2.0
         version: 0.2.2
@@ -59,7 +53,7 @@ importers:
         version: 10.1.4(chokidar@3.6.0)(typescript@5.6.2)
       '@nestjs/testing':
         specifier: ^10.0.0
-        version: 10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.4)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4))
+        version: 10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4)(@nestjs/platform-express@10.4.4)
       '@types/express':
         specifier: ^4.17.17
         version: 4.17.21
@@ -461,6 +455,12 @@ packages:
   '@langchain/core@0.3.7':
     resolution: {integrity: sha512-6wsnEtw5GlhmBhoLfw/g8Hrp09BNwQwDLXyuv3GyK+ay4/3H3YuhAphqQLO4HNphuZIZKlW9ihSrqdCMvvbvZQ==}
     engines: {node: '>=18'}
+
+  '@langchain/ollama@0.1.2':
+    resolution: {integrity: sha512-WCeogCFjdWf6jGwLt12cxkSpm5eVamv43b48DIlbJ4np9vChwVlZZB6FU7uEXNrJ9c0dsoa6877hJ5mYHdbJvw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.21 <0.4.0'
 
   '@langchain/openai@0.3.5':
     resolution: {integrity: sha512-1bCN+jEpN8IHvZTyr2kCDXHEIL+ZkE2s23tq+V6+b325GyVY2mm2zsuH6zoABCs8ayJbMaiilMJ+9AtFUtFwpw==}
@@ -1201,9 +1201,6 @@ packages:
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
-
-  crypto-js@4.2.0:
-    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -2253,6 +2250,9 @@ packages:
     resolution: {integrity: sha512-IRZSRuzJiynemAXPYtPe5BoI/RESNYR7TYm50MC5Mqbd3Jmw5y790sErYw3V6SryFJD64b74qQQs9wn5Bg/k3g==}
     engines: {node: '>= 0.4'}
 
+  ollama@0.5.10:
+    resolution: {integrity: sha512-M5O4u6S6yZeeKFrKA7ZfGGLjK54otOVGPrOUc3N64zSTpz9J+x/nh93dmD6Py7YLgXzq9I6Nq+PDDoaqJuV3LQ==}
+
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
     engines: {node: '>= 0.8'}
@@ -2933,6 +2933,9 @@ packages:
       webpack-cli:
         optional: true
 
+  whatwg-fetch@3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
+
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
 
@@ -3522,6 +3525,12 @@ snapshots:
     transitivePeerDependencies:
       - openai
 
+  '@langchain/ollama@0.1.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))':
+    dependencies:
+      '@langchain/core': 0.3.7(openai@4.67.1(zod@3.23.8))
+      ollama: 0.5.10
+      uuid: 10.0.0
+
   '@langchain/openai@0.3.5(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))':
     dependencies:
       '@langchain/core': 0.3.7(openai@4.67.1(zod@3.23.8))
@@ -3640,7 +3649,7 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@nestjs/testing@10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.4)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4))':
+  '@nestjs/testing@10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.4.4)(@nestjs/platform-express@10.4.4)':
     dependencies:
       '@nestjs/common': 10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1)
       '@nestjs/core': 10.4.4(@nestjs/common@10.4.4(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.4.4)(reflect-metadata@0.2.2)(rxjs@7.8.1)
@@ -4378,8 +4387,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  crypto-js@4.2.0: {}
 
   debug@2.6.9:
     dependencies:
@@ -5397,7 +5404,7 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  langchain@0.3.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))(openai@4.67.1(zod@3.23.8)):
+  langchain@0.3.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))(@langchain/ollama@0.1.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8))))(openai@4.67.1(zod@3.23.8)):
     dependencies:
       '@langchain/core': 0.3.7(openai@4.67.1(zod@3.23.8))
       '@langchain/openai': 0.3.5(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))
@@ -5412,6 +5419,8 @@ snapshots:
       yaml: 2.5.1
       zod: 3.23.8
       zod-to-json-schema: 3.23.3(zod@3.23.8)
+    optionalDependencies:
+      '@langchain/ollama': 0.1.2(@langchain/core@0.3.7(openai@4.67.1(zod@3.23.8)))
     transitivePeerDependencies:
       - encoding
       - openai
@@ -5579,6 +5588,10 @@ snapshots:
   object-assign@4.1.1: {}
 
   object-inspect@1.13.2: {}
+
+  ollama@0.5.10:
+    dependencies:
+      whatwg-fetch: 3.6.20
 
   on-finished@2.4.1:
     dependencies:
@@ -6239,6 +6252,8 @@ snapshots:
       - '@swc/core'
       - esbuild
       - uglify-js
+
+  whatwg-fetch@3.6.20: {}
 
   whatwg-url@5.0.0:
     dependencies:

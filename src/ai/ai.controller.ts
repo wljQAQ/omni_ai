@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Res, Sse } from '@nestjs/common';
 
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Response } from 'express';
 
 import { AiService } from './ai.service';
@@ -24,5 +25,11 @@ export class AiController {
     } finally {
       res.end();
     }
+  }
+
+  @Post('chat')
+  async chat(@Body() body: { messages: Array<HumanMessage | SystemMessage> }, @Res() res: Response) {
+    const response = await this.aiService.chat(body.messages);
+    res.json(response);
   }
 }
