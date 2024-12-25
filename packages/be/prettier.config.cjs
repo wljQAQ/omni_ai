@@ -8,12 +8,6 @@ module.exports = {
   singleQuote: true,
   printWidth: 140,
   importOrder: [
-    '^(react/(.*)$)|^(react$)',
-    '',
-    '^(antd)|^(@ant-design)',
-    '',
-    '^@omni_ai/(.*)$',
-    '',
     '^@nestjs',
     '',
     '<THIRD_PARTY_MODULES>',

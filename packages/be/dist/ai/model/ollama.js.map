@@ -1,0 +1,1 @@
+{"version":3,"file":"ollama.js","sourceRoot":"","sources":["../../../src/ai/model/ollama.ts"],"names":[],"mappings":";;;AAAA,8CAA+C;AAI/C,MAAa,WAAW;IAGtB,WAAW;QACT,IAAI,CAAC,KAAK,GAAG,IAAI,mBAAU,CAAC;YAC1B,OAAO,EAAE,wBAAwB;YACjC,KAAK,EAAE,qBAAqB;YAC5B,WAAW,EAAE,GAAG;SACjB,CAAC,CAAC;QAEH,OAAO,IAAI,CAAC,KAAK,CAAC;IACpB,CAAC;CACF;AAZD,kCAYC"}
