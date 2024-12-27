@@ -6,21 +6,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
+exports.StudyModule = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
-const ai_module_1 = require("./ai/ai.module");
-const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
-const study_module_1 = require("./study/study.module");
-let AppModule = class AppModule {
+const study_controller_1 = require("./study.controller");
+const study_service_1 = require("./study.service");
+let StudyModule = class StudyModule {
 };
-exports.AppModule = AppModule;
-exports.AppModule = AppModule = __decorate([
+exports.StudyModule = StudyModule;
+exports.StudyModule = StudyModule = __decorate([
     (0, common_1.Module)({
-        imports: [config_1.ConfigModule.forRoot(), ai_module_1.AiModule, study_module_1.StudyModule],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService]
+        controllers: [study_controller_1.StudyController],
+        providers: [study_service_1.StudyService]
     })
-], AppModule);
-//# sourceMappingURL=app.module.js.map
+], StudyModule);
+//# sourceMappingURL=study.module.js.map
