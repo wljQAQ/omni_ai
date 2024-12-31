@@ -157,11 +157,14 @@ const Chat: React.FC = () => {
 
   // ==================== Render =================
   return (
-    <div className="h-full w-full relative">
+    <div className="relative h-full w-full px-4">
       {items.length > 0 ? (
         <Bubble.List items={items} roles={roles} />
       ) : (
-        <div className="absolute top-1/2  w-full text-center font-bold text-xl">我是AI助手，有什么问题都可以问我哦</div>
+        <div className="w-full text-xl font-bold">
+          <div>你好</div>
+          <div>有什么可以帮到你?</div>
+        </div>
       )}
 
       {/* 🌟 输入框 */}

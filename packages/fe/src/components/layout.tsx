@@ -6,11 +6,16 @@ import Chat from './chat';
 
 export default function layout() {
   return (
-    <Splitter className="h-full w-full">
-      <Splitter.Panel defaultSize="50%" min="20%" max="100%">
+    <>
+      <div className="w-full h-full">
         <Chat />
-      </Splitter.Panel>
-      <Splitter.Panel>2</Splitter.Panel>
-    </Splitter>
+      </div>
+    </>
+    // <Splitter className="h-full w-full">
+    //   <Splitter.Panel defaultSize="50%" min="20%" max="100%">
+    //     <Chat />
+    //   </Splitter.Panel>
+    //   <Splitter.Panel>2</Splitter.Panel>
+    // </Splitter>
   );
 }
