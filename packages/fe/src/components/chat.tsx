@@ -7,71 +7,6 @@ import { createStyles } from 'antd-style';
 import { fetchSSE } from '../request';
 import AiInput from './ai-input';
 
-const useStyle = createStyles(({ token, css }) => {
-  return {
-    layout: css`
-      width: 100%;
-      min-width: 1000px;
-      height: 722px;
-      border-radius: ${token.borderRadius}px;
-      display: flex;
-      background: ${token.colorBgContainer};
-      font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
-
-      .ant-prompts {
-        color: ${token.colorText};
-      }
-    `,
-    conversations: css`
-      padding: 0 12px;
-      flex: 1;
-      overflow-y: auto;
-    `,
-    chat: css`
-      height: 100%;
-      width: 100%;
-      max-width: 700px;
-      margin: 0 auto;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      padding: ${token.paddingLG}px;
-      gap: 16px;
-    `,
-    messages: css`
-      flex: 1;
-    `,
-    placeholder: css`
-      padding-top: 32px;
-    `,
-    sender: css`
-      box-shadow: ${token.boxShadow};
-    `,
-    logo: css`
-      display: flex;
-      height: 72px;
-      align-items: center;
-      justify-content: start;
-      padding: 0 24px;
-      box-sizing: border-box;
-
-      img {
-        width: 24px;
-        height: 24px;
-        display: inline-block;
-      }
-
-      span {
-        display: inline-block;
-        margin: 0 8px;
-        font-weight: bold;
-        color: ${token.colorText};
-        font-size: 16px;
-      }
-    `
-  };
-});
-
 const roles: GetProp<typeof Bubble.List, 'roles'> = {
   ai: {
     placement: 'start',
@@ -89,9 +24,6 @@ const roles: GetProp<typeof Bubble.List, 'roles'> = {
 };
 
 const Chat: React.FC = () => {
-  // ==================== Style ====================
-  const { styles } = useStyle();
-
   // ==================== State ====================
 
   const [content, setContent] = React.useState('');
@@ -116,8 +48,13 @@ const Chat: React.FC = () => {
   // ==================== Event ====================
   const onSubmit = async (nextContent: string, files: any) => {
     if (!nextContent) return;
-    console.log(files, 111);
+    console.log(files, 111, nextContent);
 
+    fetchSSE('http://localhost:3000/study/chat', { messages: '你叫什么名字' }, data => {
+      console.log('data', data);
+    });
+
+    return;
     // 如果 items 中包含文件
     if (files?.length > 0) {
       const file = files[0].originFileObj;
@@ -161,9 +98,19 @@ const Chat: React.FC = () => {
       {items.length > 0 ? (
         <Bubble.List items={items} roles={roles} />
       ) : (
-        <div className="w-full text-xl font-bold">
-          <div>你好</div>
-          <div>有什么可以帮到你?</div>
+        <div className="flex w-full pt-2 text-xl font-bold">
+          <div className="-mt-1 mr-1">
+            <img
+              src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png"
+              alt="Waving Hand"
+              width="35"
+              height="35"
+            />
+          </div>
+          <div className="">
+            <div>您好</div>
+            <div>有什么可以帮到您?</div>
+          </div>
         </div>
       )}
 

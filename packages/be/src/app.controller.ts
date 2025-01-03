@@ -8,6 +8,7 @@ export class AppController {
 
   @Get()
   getHello(): string {
+    console.log(7979798);
     return 'Hello World';
   }
 }

@@ -6,8 +6,7 @@ const httpsAgent = new HttpsProxyAgent(proxyUrl);
 
 const key = '';
 export const openai = new OpenAI({
-
-  apiKey: key,
+  apiKey: '',
   //   httpAgent: httpsAgent,
   baseURL: ''
 });

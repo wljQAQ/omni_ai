@@ -1,7 +1,9 @@
+import { XStream } from '@ant-design/x';
+
 export async function fetchSSE(
   url: string,
   params: any,
-  onMessage: (data: any) => void,
+  onMessage: (data: string) => void,
   onSuccess?: (response: any) => void,
   onFinally?: () => void
 ) {
@@ -23,32 +25,11 @@ export async function fetchSSE(
       throw new Error('ReadableStream not yet supported in this browser.');
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        break;
-      }
-
-      buffer += decoder.decode(value, { stream: true });
-
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(line.slice(6));
-            onMessage(data);
-          } catch (e) {
-            console.error('Error parsing SSE data:', e);
-          }
-        }
-      }
+    for await (const chunk of XStream({
+      readableStream: response.body
+    })) {
+      console.log(chunk, 'chunk');
+      onMessage(chunk.data);
     }
 
     onSuccess?.(response);
