@@ -6,7 +6,8 @@ const httpsAgent = new HttpsProxyAgent(proxyUrl);
 
 const key = '';
 export const openai = new OpenAI({
-  apiKey: '',
+  apiKey: 'sk-cf2dc2b6f64f4e01a3778626e97be615',
   //   httpAgent: httpsAgent,
-  baseURL: ''
+  // baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+  baseURL: 'https://api.deepseek.com'
 });

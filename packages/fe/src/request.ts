@@ -28,8 +28,7 @@ export async function fetchSSE(
     for await (const chunk of XStream({
       readableStream: response.body
     })) {
-      console.log(chunk, 'chunk');
-      onMessage(chunk.data);
+      onMessage(JSON.parse(chunk.data));
     }
 
     onSuccess?.(response);

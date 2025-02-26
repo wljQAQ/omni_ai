@@ -1,11 +1,36 @@
 import React from 'react';
 
 import { CloudUploadOutlined, LinkOutlined } from '@ant-design/icons';
-import { Attachments, AttachmentsProps, Sender } from '@ant-design/x';
-import { Button, Flex, type GetProp, type GetRef } from 'antd';
+import { Attachments, AttachmentsProps, Sender, Suggestion } from '@ant-design/x';
+import { Button, Flex, Input, Select, type GetProp, type GetRef } from 'antd';
+
+import { ChatMessages, generateMessages, uploadImages2Base64 } from '../utils';
+import Test from './Test';
+
+type SuggestionItems = Exclude<GetProp<typeof Suggestion, 'items'>, () => void>;
+
+const suggestions: SuggestionItems = [
+  { label: 'Write a report', value: 'report' },
+  { label: 'Draw a picture', value: 'draw' },
+  {
+    label: 'Check some knowledge',
+    value: 'knowledge',
+    // icon: <OpenAIFilled />,
+    children: [
+      {
+        label: 'About React',
+        value: 'react'
+      },
+      {
+        label: 'About Ant Design',
+        value: 'antd'
+      }
+    ]
+  }
+];
 
 interface AiInputProps {
-  onSubmit?: (text: string, items: GetProp<AttachmentsProps, 'items'>) => void;
+  onSubmit?: (messages: ChatMessages) => void;
   onChange?: (text: string) => void;
   className?: string;
   value?: string;
@@ -13,7 +38,6 @@ interface AiInputProps {
 }
 
 const AiInput = ({ onSubmit, className, value, loading, onChange }: AiInputProps) => {
-  console.log('AiInput', className);
   const [open, setOpen] = React.useState(false);
   const [items, setItems] = React.useState<GetProp<AttachmentsProps, 'items'>>([]);
   const [text, setText] = React.useState(value || '');
@@ -24,7 +48,6 @@ const AiInput = ({ onSubmit, className, value, loading, onChange }: AiInputProps
 
   const senderHeader = (
     <Sender.Header
-      title="Attachments"
       styles={{
         content: {
           padding: 0
@@ -36,7 +59,6 @@ const AiInput = ({ onSubmit, className, value, loading, onChange }: AiInputProps
     >
       <Attachments
         ref={attachmentsRef}
-        // Mock not real upload file
         beforeUpload={() => false}
         items={items}
         onChange={({ fileList }) => setItems(fileList)}
@@ -57,36 +79,55 @@ const AiInput = ({ onSubmit, className, value, loading, onChange }: AiInputProps
   );
 
   return (
-    <Flex className={className} style={{ height: 220 }} align="end">
-      <Sender
-        ref={senderRef}
-        header={senderHeader}
-        prefix={
-          <Button
-            type="text"
-            icon={<LinkOutlined />}
-            onClick={() => {
-              setOpen(!open);
+    <Suggestion
+      items={suggestions}
+      onSelect={itemVal => {
+        setText(`[${itemVal}]:`);
+      }}
+    >
+      {({ onTrigger, onKeyDown }) => {
+        return (
+          <Sender
+            ref={senderRef}
+            header={senderHeader}
+            prefix={
+              <Button
+                type="text"
+                icon={<LinkOutlined />}
+                onClick={() => {
+                  setOpen(!open);
+                }}
+              />
+            }
+            components={{
+              input: Test
             }}
+            value={text}
+            onChange={value => {
+              if (value === '/') {
+                onTrigger();
+              } else if (!value) {
+                onTrigger(false);
+              }
+              setText(value);
+              onChange?.(value);
+            }}
+            onPasteFile={file => {
+              attachmentsRef.current?.upload(file);
+              setOpen(true);
+            }}
+            onSubmit={async () => {
+              const messages = generateMessages(text, await uploadImages2Base64(items));
+              setItems([]);
+              setText('');
+              onSubmit?.(messages);
+            }}
+            onKeyDown={onKeyDown}
+            loading={loading}
           />
-        }
-        value={text}
-        onChange={value => {
-          setText(value);
-          onChange?.(value);
-        }}
-        onPasteFile={file => {
-          attachmentsRef.current?.upload(file);
-          setOpen(true);
-        }}
-        onSubmit={() => {
-          setItems([]);
-          setText('');
-          onSubmit?.(text, items);
-        }}
-        loading={loading}
-      />
-    </Flex>
+        );
+      }}
+    </Suggestion>
   );
 };
 

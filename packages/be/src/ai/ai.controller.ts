@@ -29,18 +29,36 @@ export class AiController {
 
   @Post('chat')
   async chat(@Body() body: { messages: Array<HumanMessage | SystemMessage> }, @Res() res: Response) {
-    const response = await this.aiService.chat(body.messages);
-    res.json(response);
-  }
-
-  @Post('generateVueCodeFromImage')
-  async generateVueCodeFromImage(@Body() body: { imageBase64: string }, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
     try {
-      for await (const chunk of this.aiService.generateVueCodeFromImage(body.imageBase64)) {
+      for await (const chunk of this.aiService.chat(body.messages)) {
+        const data = {
+          role: 'assistant',
+          type: 'answer',
+          content: chunk,
+          content_type: 'text'
+        };
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      }
+    } catch (error) {
+      console.error('Error in code generation:', error);
+      res.write(`data: ${JSON.stringify({ error: 'An error occurred during code generation' })}\n\n`);
+    } finally {
+      res.end();
+    }
+  }
+
+  @Post('generateVueCodeFromImage')
+  async generateVueCodeFromImage(@Body() body: { image: string }, @Res() res: Response) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    try {
+      for await (const chunk of this.aiService.generateVueCodeFromImage(body.image)) {
         res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
       }
     } catch (error) {

@@ -1,11 +1,16 @@
 import React, { useEffect } from 'react';
 
-import { Bubble, useXAgent, useXChat, Welcome } from '@ant-design/x';
-import { Space, type GetProp } from 'antd';
-import { createStyles } from 'antd-style';
+import { CoffeeOutlined, FireOutlined, SmileOutlined } from '@ant-design/icons';
+import { Bubble, Prompts, PromptsProps, useXAgent, useXChat, Welcome } from '@ant-design/x';
+import { Image, Space, type GetProp } from 'antd';
+
+import markdownit from 'markdown-it';
 
 import { fetchSSE } from '../request';
+import { ChatMessages } from '../utils';
 import AiInput from './ai-input';
+
+const md = markdownit({ html: true, breaks: true });
 
 const roles: GetProp<typeof Bubble.List, 'roles'> = {
   ai: {
@@ -15,84 +20,96 @@ const roles: GetProp<typeof Bubble.List, 'roles'> = {
       content: {
         borderRadius: 16
       }
+    },
+    messageRender: (items: any) => {
+      return <div className="max-h-[500px] overflow-y-auto" dangerouslySetInnerHTML={{ __html: md.render(items) }}></div>;
     }
   },
   local: {
     placement: 'end',
-    variant: 'shadow'
+    // variant: 'shadow',
+    messageRender: (items: any) => {
+      //处理存在图片的的情况
+      const imageItems = (items as ChatMessages).filter(item => item.type === 'image_url');
+
+      const textItems = (items as ChatMessages).find(item => item.type === 'text');
+      return (
+        <div>
+          {imageItems.length > 0 && (
+            <div>
+              {imageItems.map(item => {
+                return <Image src={item.image_url.url} key={item.image_url.url} />;
+              })}
+            </div>
+          )}
+
+          <div key={textItems?.text}>{textItems?.text}</div>
+        </div>
+      );
+    }
   }
 };
 
+const promptItems: PromptsProps['items'] = [
+  {
+    key: '6',
+    icon: <CoffeeOutlined style={{ color: '#964B00' }} />,
+    description: '插入一个新的区块',
+    disabled: false
+  },
+  {
+    key: '7',
+    icon: <SmileOutlined style={{ color: '#FAAD14' }} />,
+    description: '插入一个vue组件',
+    disabled: false
+  }
+];
+
 const Chat: React.FC = () => {
-  // ==================== State ====================
-
-  const [content, setContent] = React.useState('');
-
-  // ==================== Runtime ====================
-  const [agent] = useXAgent({
-    request: async ({ message }, { onSuccess }) => {
+  const [agent] = useXAgent<ChatMessages>({
+    request: async ({}, { onSuccess, onUpdate }) => {
       let content = '';
-      fetchSSE('/ai/chat', { messages: '你好' }, data => {
-        content += data;
-        console.log('content', content);
-      });
-      console.log('message', message);
-      onSuccess(`Mock success return. You said: ${message}`);
+      const message = [
+        {
+          type: 'image_url',
+          image_url: {
+            url: 'https://v0.dev/_next/image?url=https%3A%2F%2Fhebbkx1anhila5yf.public.blob.vercel-storage.com%2Fimage-HNbLp0gVw3SctE5GluPVQ9arpac8OZ.png&w=1920&q=75'
+          }
+        },
+        {
+          type: 'text',
+          text: '根据图片生成dsl'
+        }
+      ];
+
+      fetchSSE(
+        'http://localhost:3000/ai/chat',
+        { messages: message },
+        data => {
+          content += data.content;
+
+          console.log('content', content);
+          onUpdate(content);
+        },
+        data => {
+          onSuccess(content);
+          // console.log('success', data);
+        }
+      );
     }
   });
 
-  const { onRequest, messages, setMessages } = useXChat({
+  const { onRequest, messages } = useXChat({
     agent
   });
 
-  // ==================== Event ====================
-  const onSubmit = async (nextContent: string, files: any) => {
-    if (!nextContent) return;
-    console.log(files, 111, nextContent);
-
-    fetchSSE('http://localhost:3000/study/chat', { messages: '你叫什么名字' }, data => {
-      console.log('data', data);
-    });
-
-    return;
-    // 如果 items 中包含文件
-    if (files?.length > 0) {
-      const file = files[0].originFileObj;
-
-      // 检查是否为图片
-      if (!file.type.startsWith('image/')) {
-        return;
-      }
-
-      // 转换为 base64
-      const base64 = await new Promise<string>(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          resolve(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      });
-
-      let content = '';
-      // 发送请求
-      fetchSSE('http://localhost:3000/ai/generateVueCodeFromImage', { imageBase64: base64 }, data => {
-        content += data.content;
-        console.log('data', content);
-      });
-      return;
-    }
-    onRequest('');
-    setContent('');
-  };
-
   const items: GetProp<typeof Bubble.List, 'items'> = messages.map(({ id, message, status }) => ({
     key: id,
-    loading: status === 'loading',
+    // loading: status === 'loading',
     role: status === 'local' ? 'local' : 'ai',
     content: message
   }));
 
-  // ==================== Render =================
   return (
     <div className="relative h-full w-full px-4">
       {items.length > 0 ? (
@@ -114,9 +131,15 @@ const Chat: React.FC = () => {
         </div>
       )}
 
-      {/* 🌟 输入框 */}
       <div className="absolute bottom-5 left-0 w-full px-4">
-        <AiInput onSubmit={onSubmit} />
+        {/* propmt提示 */}
+        <Prompts items={promptItems} vertical title="🌟 尝试一下" />
+        {/* 🌟 输入框 */}
+        <AiInput
+          onSubmit={messages => {
+            onRequest(messages);
+          }}
+        />
       </div>
     </div>
   );
