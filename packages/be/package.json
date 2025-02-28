@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.3.3",
     "@langchain/core": "^0.3.7",
     "@langchain/ollama": "^0.1.2",
     "@langchain/openai": "^0.3.5",
