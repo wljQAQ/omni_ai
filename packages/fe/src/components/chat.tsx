@@ -27,7 +27,7 @@ const roles: GetProp<typeof Bubble.List, 'roles'> = {
   },
   local: {
     placement: 'end',
-    // variant: 'shadow',
+    // variant: 'shadow-sm',
     messageRender: (items: any) => {
       //处理存在图片的的情况
       const imageItems = (items as ChatMessages).filter(item => item.type === 'image_url');
