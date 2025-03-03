@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { DeepseekModel, OllamaModel, OpenaiModel, QwenModel } from './model';
+import { DeepseekModel, OpenaiModel, QwenModel } from './model';
 import { getConvertOldCodePrompt } from './prompt';
 import { getDSLPrompt, pmPrompt, systemPrompt } from './prompts/lowcode_prompt';
 

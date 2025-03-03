@@ -4,7 +4,7 @@ import { ChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai';
 
 import type { BaseModelProvider } from './interface';
 
-export class QwenModel implements BaseModelProvider<ChatOpenAI<ChatOpenAICallOptions>> {
+export class QwenModel {
   model: ChatOpenAI<ChatOpenAICallOptions>;
 
   createModel() {
