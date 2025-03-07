@@ -1,0 +1,14 @@
+[
+  {
+    "old_code": "function MyLink(m,field,value) { var ryid = getObj(\"mytext_\"+m+\"_id\").value; ... }",
+    "new_code": "function MyLink(e) { this.$util.openWin({ pid: 6964, params: { ryid: e.data.ryid, ... } }) }",
+    "transformation_rules": ["Replace getObj with e.data", "Convert URL string to structured params", "Use this.$util.openWin"],
+    "pattern_type": "basic_window_open"
+  },
+  {
+    "old_code": "function MyLink(m,field,value) { if (field === \"detail\") { ... } }",
+    "new_code": "function MyLink(e) { if (e.colDef.field === \"detail\") { ... } }",
+    "transformation_rules": ["Replace field string comparison with e.colDef.field", "Use openModal with structured params"],
+    "pattern_type": "conditional_modal"
+  }
+]
