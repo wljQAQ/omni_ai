@@ -8,6 +8,7 @@ import type { BaseModelProvider } from './interface';
  * deepseek全面兼容 openAI 所以直接用 langchain/openai
  */
 
+//@ts-ignore
 export class DeepseekModel extends BaseModel<ChatOpenAI<ChatOpenAICallOptions>> {
   createModel() {
     const model = new ChatOpenAI({

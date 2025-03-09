@@ -14,8 +14,8 @@ export class AiService {
   private imageBase64: string;
   constructor() {
     this.model = new DeepseekModel();
-    const imageBuffer = fs.readFileSync(path.resolve(__dirname, '../../image_2.png'));
-    this.imageBase64 = imageBuffer.toString('base64');
+    // const imageBuffer = fs.readFileSync(path.resolve(__dirname, '../../image_2.png'));
+    // this.imageBase64 = imageBuffer.toString('base64');
   }
 
   /**

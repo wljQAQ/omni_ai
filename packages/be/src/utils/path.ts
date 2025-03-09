@@ -11,3 +11,7 @@ export const getModelsDir = () => {
 export const getTestDataDir = () => {
   return join(getRootDir(), '/test-data/');
 };
+
+export const getMcpServerDir = () => {
+  return join(getRootDir(), '../mcp-server/');
+};
