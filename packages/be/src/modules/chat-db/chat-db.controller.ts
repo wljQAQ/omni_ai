@@ -1,6 +1,7 @@
 import { Controller, Get, Post } from '@nestjs/common';
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 
 import { McpClient } from '@/core/mcp-client';
 import { getMcpServerDir } from '@/utils';
@@ -20,24 +21,14 @@ export class ChatDbController {
     const pgMcpServerPath = getMcpServerDir() + 'postgres/dist/index.js';
     const client = new McpClient();
 
-    await client.connect(pgMcpServerPath);
+    const mcp = await client.connect(pgMcpServerPath);
 
-    console.log(pgMcpServerPath, 'pgMcpServerPath1');
+    const langchainTools = await client.getLangchainTools();
 
-    const model = this.modelProvider.createModel();
+    const model = this.modelProvider.createModel('deepseek');
 
-    return model.chat([
-      new HumanMessage({
-        content: [
-          {
-            type: 'image_url',
-            image_url: { url: 'https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20241022/emyrja/dog_and_girl.jpeg' }
-          },
-          { type: 'text', text: '这是什么？' }
-        ]
-      })
-    ]);
+    const llmWithTools = model.bindTools(langchainTools);
 
-    return 11;
+    return llmWithTools.invoke('帮我去数据库种查一下低代码 文章的内容');
   }
 }

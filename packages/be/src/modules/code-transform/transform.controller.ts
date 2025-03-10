@@ -16,7 +16,7 @@ import { HuggingFaceEmbedding } from '@/core/embedding-engines';
 import { RAGSystem } from '@/core/rag-system';
 import { getModelsDir, getTestDataDir } from '@/utils/path';
 
-import { mylinkList } from './data';
+// import { mylinkList } from './data';
 import { TransformService } from './transform.service';
 
 @Controller('ai/code-transform')
@@ -89,6 +89,7 @@ export class TransformController {
 
     //2.1尝试使用vector store + rerank 找到最相似的代码 + 转换例子
     const { oldCode } = body;
+    const mylinkList = [];
     // Find similar examples
     const num = Math.floor(Math.random() * mylinkList.length);
 

@@ -21,7 +21,7 @@ export class TransformService {
   async transformReport(message: Array<HumanMessage | SystemMessage>) {
     const model = this.modelProvider.createModel('deepseek');
 
-    return model.chat(message);
+    return model.invoke(message);
   }
 
   // 获取bbcode并写入到本地文件中省的每次都去查询

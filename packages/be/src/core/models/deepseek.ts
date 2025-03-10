@@ -8,8 +8,9 @@ import { BaseModel } from './base.model';
 //@ts-ignore
 export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOptions>> {
   createModel() {
+    console.log(process.env.DEEPSEEK_BASE_URL, process.env.DEEPSEEK_API_KEY);
     const model = new ChatDeepSeek({
-      modelName: 'default',
+      modelName: 'Qwen/QwQ-32B',
       temperature: 0.2,
       configuration: {
         baseURL: process.env.DEEPSEEK_BASE_URL
