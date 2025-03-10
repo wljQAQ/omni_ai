@@ -13,7 +13,7 @@ export class ModelProvider {
       case 'ollama':
         return new OllamaModel(config);
       default:
-        throw new Error(`Model ${modelName} not found`);
+        return new DeepseekModel(config);
     }
   }
 }

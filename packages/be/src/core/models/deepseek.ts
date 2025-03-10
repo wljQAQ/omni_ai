@@ -1,22 +1,20 @@
-import { CallbackManager } from '@langchain/core/callbacks/manager';
-import { ChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai';
+import { ChatDeepSeek, type ChatDeepSeekCallOptions } from '@langchain/deepseek';
 
 import { BaseModel } from './base.model';
-import type { BaseModelProvider } from './interface';
 
 /**
  * deepseek全面兼容 openAI 所以直接用 langchain/openai
  */
 //@ts-ignore
-export class DeepseekModel extends BaseModel<ChatOpenAI<ChatOpenAICallOptions>> {
+export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOptions>> {
   createModel() {
-    const model = new ChatOpenAI({
+    const model = new ChatDeepSeek({
       modelName: 'default',
       temperature: 0.2,
-      openAIApiKey: process.env.DEEPSEEK_API_KEY,
       configuration: {
         baseURL: process.env.DEEPSEEK_BASE_URL
-      }
+      },
+      apiKey: process.env.DEEPSEEK_API_KEY
     });
 
     return model;

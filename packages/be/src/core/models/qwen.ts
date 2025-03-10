@@ -2,7 +2,6 @@ import { CallbackManager } from '@langchain/core/callbacks/manager';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai';
 
-import type { BaseModelProvider } from './interface';
 
 export class QwenModel {
   model: ChatOpenAI<ChatOpenAICallOptions>;

@@ -67,11 +67,11 @@ export class RAGSystem {
   async addCodeTransformExample() {
     await this.init();
 
-    // 创建更优化的文档
     const docs = codeExamples.map(example => {
       return new Document({
         pageContent: example.oldCode,
         metadata: {
+          newCode: example.newCode,
           pattern_type: example.patternType,
           transformation_rules: example.transformationRules
         }

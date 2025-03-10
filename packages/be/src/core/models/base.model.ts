@@ -23,7 +23,7 @@ export abstract class BaseModel<Model extends BaseChatModel> {
   chat(messages: Array<HumanMessage | SystemMessage>) {
     const model = this.createModel();
 
-    model.bindTools([]);
+    // model.bindTools([]);
 
     return model.invoke(messages);
   }

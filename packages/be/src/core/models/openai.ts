@@ -1,8 +1,8 @@
 import { CallbackManager } from '@langchain/core/callbacks/manager';
 import { ChatOpenAI, type ChatOpenAICallOptions } from '@langchain/openai';
 
-import type { BaseModelProvider } from './interface';
 
+//@ts-ignore
 export class OpenaiModel implements BaseModelProvider<ChatOpenAI<ChatOpenAICallOptions>> {
   model: ChatOpenAI<ChatOpenAICallOptions>;
 
