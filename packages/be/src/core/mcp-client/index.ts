@@ -1,7 +1,7 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { JsonSchema, jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 
 export class McpClient {
   private client: Client;
@@ -36,6 +36,8 @@ export class McpClient {
           description: i.description,
           schema: jsonSchemaToZod(i.inputSchema),
           func: async input => {
+            console.log(input, 'input');
+
             const res = await this.client.callTool({
               name: i.name,
               arguments: input as any

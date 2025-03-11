@@ -8,14 +8,16 @@ import { BaseModel } from './base.model';
 //@ts-ignore
 export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOptions>> {
   createModel() {
-    console.log(process.env.DEEPSEEK_BASE_URL, process.env.DEEPSEEK_API_KEY);
+    console.log(process.env.SILICONFLOW_BASE_URL, process.env.SILICONFLOW_API_KEY);
     const model = new ChatDeepSeek({
-      modelName: 'Qwen/QwQ-32B',
+      modelName: 'Qwen/Qwen2.5-72B-Instruct-128K',
       temperature: 0.2,
       configuration: {
-        baseURL: process.env.DEEPSEEK_BASE_URL
+        // baseURL: process.env.DEEPSEEK_BASE_URL
+        baseURL: process.env.SILICONFLOW_BASE_URL
       },
-      apiKey: process.env.DEEPSEEK_API_KEY
+      // apiKey: process.env.DEEPSEEK_API_KEY
+      apiKey: process.env.SILICONFLOW_API_KEY
     });
 
     return model;
