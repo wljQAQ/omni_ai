@@ -29,13 +29,16 @@ export class ChatDbController {
 
     const model = this.modelProvider.createModel('deepseek');
 
-    // const llmWithTools = model.bindTools(langchainTools);
+    const llmWithTools = model.bindTools(langchainTools);
 
     const calculatorSchema = z.object({
       operation: z.enum(['add', 'subtract', 'multiply', 'divide']).describe('The type of operation to execute.'),
       number1: z.number().describe('The first number to operate on.'),
       number2: z.number().describe('The second number to operate on.')
     });
+
+
+    
 
     const calculatorTool = tool(
       async ({ operation, number1, number2 }) => {
@@ -60,7 +63,9 @@ export class ChatDbController {
       }
     );
 
-    const llmWithTools = model.bindTools([calculatorTool]);
+    // const llmWithTools = model.bindTools([calculatorTool]);
+
+    const messages = [new HumanMessage('帮我查一下公司现在有多少人？他们的职位是什么')];
 
     // const stream = await llmWithTools.stream('帮我去数据库种查一下低代码 文章的内容');
 
@@ -72,13 +77,15 @@ export class ChatDbController {
 
     //   process.stdout.write(content);
     // }
-    const messages = [new HumanMessage('3 * 12是多少')];
+    // const messages = [new HumanMessage('3 * 12是多少')];
 
     const aiMessage = await llmWithTools.invoke(messages);
 
-    const toolsByName = {
-      calculator: calculatorTool
-    };
+    const toolsByName = {};
+
+    langchainTools.forEach(tool => {
+      toolsByName[tool.name] = tool;
+    });
 
     console.log(aiMessage.content);
     messages.push(aiMessage);
@@ -92,9 +99,12 @@ export class ChatDbController {
 
     const finalRes = await llmWithTools.invoke(messages);
 
-    console.log(finalRes.content);
+    console.log(finalRes.content, 'finalRes.content)');
 
-    return finalRes;
+    return {
+      finalRes: finalRes.content,
+      aiMessage: aiMessage.content
+    };
 
     // const result = await llmWithTools.invoke([
     //   new SystemMessage(
