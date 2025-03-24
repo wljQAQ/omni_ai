@@ -37,9 +37,6 @@ export class ChatDbController {
       number2: z.number().describe('The second number to operate on.')
     });
 
-
-    
-
     const calculatorTool = tool(
       async ({ operation, number1, number2 }) => {
         console.log('我调用了tool:', operation, number1, number2);

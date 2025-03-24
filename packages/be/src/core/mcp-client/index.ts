@@ -9,7 +9,7 @@ export class McpClient {
   async connect(serverScriptPath: string) {
     const transport = new StdioClientTransport({
       command: 'node',
-      args: [serverScriptPath, 'postgresql://postgres:123456@localhost:5432/blog']
+      args: [serverScriptPath, 'postgresql://huakaifugui:200061@localhost:5432/test']
     });
 
     this.client = new Client(
