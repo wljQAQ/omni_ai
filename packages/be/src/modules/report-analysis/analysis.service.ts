@@ -35,12 +35,13 @@ export class ReportAnalysisService {
     //   content: getAnalysisPrompt(data)
     // });
     const prompt = new SystemMessage({
-      content: '你是什么模型？'
+      content: '帮我生成一个echart柱状图，只需要给echart的配置项就行'
     });
+
+    console.log(prompt, 'prompt');
 
     const stream = await this.model.streamChat([prompt]);
 
-    console.log(this.model.model.name, 'this.model');
     return {
       model: this.model.model,
       stream

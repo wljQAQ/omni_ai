@@ -29,16 +29,6 @@ export class PGVector {
 
       //   console.log(Client, 'pg');
 
-      //   this.db = new Client({
-      //     host: '192.168.35.106',
-      //     port: 5432,
-      //     user: 'root',
-      //     password: 'Password123@postgres',
-      //     database: 'postgres'
-      //   });
-
-      //   await this.db.connect();
-
       //   创建 vector 扩展
       await this.db.query(`CREATE EXTENSION IF NOT EXISTS vector`);
 
