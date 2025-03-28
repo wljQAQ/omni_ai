@@ -109,18 +109,19 @@ export function getReportChartPrompt(data: any) {
      - 为每种推荐的图表类型生成完整的ECharts配置
      - 包括坐标轴、图例、提示框、数据系列等详细配置
      - 提供适合的配色方案和样式设置
-  
-  4. 交互功能建议
-     - 推荐适合的交互功能（缩放、筛选、钻取等）
-     - 提供相应的ECharts配置参数
-  
+
   ## Output Format:
   1. 首先分析数据特征和可视化目标
-  2. 推荐最适合的图表类型（1-3种），并说明选择理由
-  3. 对于每种推荐的图表类型，提供：
-     - 图表类型名称（使用<echart_type></echart_type>标签包裹）
-     - 完整的ECharts配置项（使用<echart_option></echart_option>标签包裹）
-     - 配置说明和使用建议
+  2. 推荐最适合的图表类型（1-3种），但是你不用说明理由
+  3. 对于每种推荐的图表类型，必须严格按照以下XML格式提供：
+     <lilanz-chart>
+     <chart-type>图表类型名称</chart-type>
+     <chart-option>
+     {
+       // 完整的ECharts配置项（有效的JSON格式）
+     }
+     </chart-option>
+     </lilanz-chart>
   
   ## Examples:
   
@@ -128,9 +129,9 @@ export function getReportChartPrompt(data: any) {
   
   基于销售数据的时间趋势分析，我推荐使用折线图来展示销售额随时间的变化趋势。
   
-  <echart_type>line</echart_type>
-  
-  <echart_option>
+  <lilanz-chart>
+  <chart-type>line</chart-type>
+  <chart-option>
   {
     "title": {
       "text": "月度销售额趋势",
@@ -162,15 +163,16 @@ export function getReportChartPrompt(data: any) {
       }
     ]
   }
-  </echart_option>
+  </chart-option>
+  </lilanz-chart>
   
   ### 示例2：产品类别销售比例分析
   
   对于产品类别的销售比例分析，饼图是最直观的选择。
   
-  <echart_type>pie</echart_type>
-  
-  <echart_option>
+  <lilanz-chart>
+  <chart-type>pie</chart-type>
+  <chart-option>
   {
     "title": {
       "text": "产品销售占比",
@@ -212,15 +214,16 @@ export function getReportChartPrompt(data: any) {
       }
     ]
   }
-  </echart_option>
+  </chart-option>
+  </lilanz-chart>
   
   ### 示例3：多维度对比分析
   
   对于需要比较多个类别在不同维度上的表现，推荐使用柱状图。
   
-  <echart_type>bar</echart_type>
-  
-  <echart_option>
+  <lilanz-chart>
+  <chart-type>bar</chart-type>
+  <chart-option>
   {
     "title": {
       "text": "各区域销售业绩对比",
@@ -274,15 +277,17 @@ export function getReportChartPrompt(data: any) {
       }
     ]
   }
-  </echart_option>
+  </chart-option>
+  </lilanz-chart>
   
   ## Constraints:
   1. 严格基于提供的数据进行分析，不得臆测或编造不存在的数据
   2. 图表选择必须与用户问题和数据特征高度相关
   3. 生成的ECharts配置必须是有效的JSON格式，可直接用于ECharts初始化
   4. 配置中的数据必须来自提供的数据集，或是基于数据集的合理计算结果
-  5. 提供的配置应包含必要的交互功能，如提示框、图例等
+  5. 不要解释图表选择理由，直接输出图表配置
   6. 配色方案应专业、和谐，并考虑数据可视化的清晰度
   7. 对于复杂数据，应考虑提供多种可视化方案供选择
+  8. 必须严格按照指定的XML格式输出图表配置，标签名称必须完全匹配：<lilanz-chart>、<chart-type>和<chart-option>
   `;
 }

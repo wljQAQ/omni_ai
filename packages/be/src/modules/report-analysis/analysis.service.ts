@@ -9,7 +9,7 @@ import { connect, query } from 'mssql';
 import { BaseModel, ModelProvider } from '@/core/models';
 import { getTestDataDir } from '@/utils';
 
-import { getAnalysisPrompt } from './prompt';
+import { getAnalysisPrompt, getReportChartPrompt } from './prompt';
 
 @Injectable()
 export class ReportAnalysisService {
@@ -35,7 +35,7 @@ export class ReportAnalysisService {
     //   content: getAnalysisPrompt(data)
     // });
     const prompt = new SystemMessage({
-      content: '帮我生成一个echart柱状图，只需要给echart的配置项就行'
+      content: getReportChartPrompt(data)
     });
 
     console.log(prompt, 'prompt');

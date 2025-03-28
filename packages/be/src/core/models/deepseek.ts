@@ -10,7 +10,7 @@ export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOption
   createModel() {
     console.log(process.env.SILICONFLOW_BASE_URL, process.env.SILICONFLOW_API_KEY);
     const model = new ChatDeepSeek({
-      modelName: 'Qwen/QwQ-32B',
+      modelName: 'deepseek-ai/DeepSeek-V3',
       temperature: 0.2,
       configuration: {
         // baseURL: process.env.DEEPSEEK_BASE_URL
