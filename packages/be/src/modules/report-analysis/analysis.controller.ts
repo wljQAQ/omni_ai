@@ -7,9 +7,10 @@ import { join } from 'node:path';
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 
-import { AIMessageChunk } from '@langchain/core/messages';
+import { AIMessageChunk, SystemMessage } from '@langchain/core/messages';
 
 import { ReportAnalysisService } from './analysis.service';
+import { getAnalysisPrompt, getReportChartPrompt } from './prompt';
 
 @Controller('ai/report-analysis')
 export class ReportAnalysisController {
@@ -145,29 +146,52 @@ export class ReportAnalysisController {
       }
     ];
 
-    const { stream, model } = await this.service.analyzeReport(columns, rows, '分析一下当前报表');
+    const model = await this.service.analyzeReport(columns, rows, '分析一下当前报表');
+    const data = {
+      columns,
+      rows,
+      title: '客户同期对比',
+      question: '分析一下当前报表'
+    };
 
-    for await (const chunk of stream) {
-      // if (chunk.additional_kwargs.reasoning_content) thinking += chunk.additional_kwargs.reasoning_content;
-      // if (chunk.content) content += chunk.content;
+    const prompt = new SystemMessage({
+      content: getReportChartPrompt(data)
+    });
 
-      res.write(`data: ${JSON.stringify(formatChunk(chunk))}\n\n`);
-    }
+    model.enhancedStreamChat([prompt], {
+      onMessage: message => {
+        console.log(message, 'message');
 
-    res.end();
+        res.write(`data: ${JSON.stringify(message)}\n\n`);
+      },
+      onFinish: () => {
+        console.log('finish');
+        res.end();
+      }
+    });
+    // const { stream, model } = await this.service.analyzeReport(columns, rows, '分析一下当前报表');
 
-    function formatChunk(chunk: AIMessageChunk) {
-      return {
-        model: model.name,
-        sentenceList: [
-          {
-            reasoning_content: chunk.additional_kwargs.reasoning_content,
-            content: chunk.content,
-            role: 'assistant',
-            type: 'text'
-          }
-        ]
-      };
-    }
+    // for await (const chunk of stream) {
+    //   // if (chunk.additional_kwargs.reasoning_content) thinking += chunk.additional_kwargs.reasoning_content;
+    //   // if (chunk.content) content += chunk.content;
+
+    //   res.write(`data: ${JSON.stringify(formatChunk(chunk))}\n\n`);
+    // }
+
+    // res.end();
+
+    // function formatChunk(chunk: AIMessageChunk) {
+    //   return {
+    //     model: model.name,
+    //     sentenceList: [
+    //       {
+    //         reasoning_content: chunk.additional_kwargs.reasoning_content,
+    //         content: chunk.content,
+    //         role: 'assistant',
+    //         type: 'text'
+    //       }
+    //     ]
+    //   };
+    // }
   }
 }

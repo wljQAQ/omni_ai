@@ -111,7 +111,7 @@ export function getReportChartPrompt(data: any) {
      - 提供适合的配色方案和样式设置
 
   ## Output Format:
-  1. 首先分析数据特征和可视化目标
+  1. 首先分析数据特征和可视化目标 200字左右
   2. 推荐最适合的图表类型（1-3种），但是你不用说明理由
   3. 对于每种推荐的图表类型，必须严格按照以下XML格式提供：
      <lilanz-chart>

@@ -38,14 +38,14 @@ export class ReportAnalysisService {
       content: getReportChartPrompt(data)
     });
 
-    console.log(prompt, 'prompt');
+    return this.model;
 
-    const stream = await this.model.streamChat([prompt]);
+    // const stream = await this.model.streamChat([prompt]);
 
-    return {
-      model: this.model.model,
-      stream
-    };
+    // return {
+    //   model: this.model.model,
+    //   stream
+    // };
 
     // let thinking = '';
     // let content = '';
