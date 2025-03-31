@@ -3,14 +3,13 @@
  * 旧通用报表转新低代码js
  */
 
-import { join } from 'node:path';
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
-import { ApiBody, ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, Post, Res } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
 
-import { AIMessageChunk, SystemMessage } from '@langchain/core/messages';
+import { SystemMessage } from '@langchain/core/messages';
 
 import { ReportAnalysisService } from './analysis.service';
-import { getAnalysisPrompt, getReportChartPrompt } from './prompt';
+import { getReportChartPrompt } from './prompt';
 
 @Controller('ai/report-analysis')
 export class ReportAnalysisController {

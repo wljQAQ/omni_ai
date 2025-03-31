@@ -1,12 +1,10 @@
 import { readFileSync } from 'node:fs';
 
-import { CSVLoader } from '@langchain/community/document_loaders/fs/csv';
 import { Document } from '@langchain/core/documents';
 import { Embeddings } from '@langchain/core/embeddings';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 import { codeExamples } from '@/modules/code-transform/example';
-import { getTestDataDir } from '@/utils';
 
 import { HuggingFaceEmbedding } from '../embedding-engines';
 import { PGVector } from '../vectordb-providers/pgvector';

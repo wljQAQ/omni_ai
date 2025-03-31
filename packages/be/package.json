@@ -41,6 +41,7 @@
     "chromadb": "^1.10.4",
     "cross-env": "^7.0.3",
     "d3-dsv": "2",
+    "fast-xml-parser": "^5.0.9",
     "https-proxy-agent": "^7.0.6",
     "langchain": "^0.3.19",
     "mssql": "^11.0.1",

@@ -4,6 +4,113 @@
 
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { XMLParser } from 'fast-xml-parser';
+
+// const xmlParser = new XMLParser({
+//   trimValues: true
+// });
+
+// const content = xmlParser.parse(
+//   `
+// <chart-type>bar</chart-type>
+// <chart-option>
+// {
+//   "title": {
+//     "text": "客户同期金额与数量对比",
+//     "left": "center"
+//   },
+//   "tooltip": {
+//     "trigger": "axis",
+//     "axisPointer": {
+//       "type": "shadow"
+//     },
+//     "formatter": "{b} {a0}: {c0}元<br/>{a1}: {c1}件<br/>{a2}: {c2}%<br/>{a3}: {c3}%"
+//   },
+//   "legend": {
+//     "data": ["本年金额", "上年金额", "金额同比增长", "数量同比增长"],
+//     "bottom": "bottom"
+//   },
+//   "grid": {
+//     "left": "3%",
+//     "right": "4%",
+//     "bottom": "15%",
+//     "containLabel": true
+//   },
+//   "xAxis": {
+//     "type": "category",
+//     "data": ["1J·河南新上利公司(混合)", "3X·浙江启扬(直营)"]
+//   },
+//   "yAxis": [
+//     {
+//       "type": "value",
+//       "name": "金额(元)",
+//       "position": "left"
+//     },
+//     {
+//       "type": "value",
+//       "name": "增长率(%)",
+//       "position": "right",
+//       "axisLabel": {
+//         "formatter": "{value}%"
+//       }
+//     }
+//   ],
+//   "series": [
+//     {
+//       "name": "本年金额",
+//       "type": "bar",
+//       "data": [686063.17, 558573],
+//       "itemStyle": {
+//         "color": "#5470C6"
+//       }
+//     },
+//     {
+//       "name": "上年金额",
+//       "type": "bar",
+//       "data": [240421.11, 232140],
+//       "itemStyle": {
+//         "color": "#91CC75"
+//       }
+//     },
+//     {
+//       "name": "金额同比增长",
+//       "type": "line",
+//       "yAxisIndex": 1,
+//       "data": [185.3589, 140.619],
+//       "symbol": "circle",
+//       "symbolSize": 8,
+//       "itemStyle": {
+//         "color": "#EE6666"
+//       },
+//       "label": {
+//         "show": true,
+//         "formatter": "{c}%",
+//         "position": "top"
+//       }
+//     },
+//     {
+//       "name": "数量同比增长",
+//       "type": "line",
+//       "yAxisIndex": 1,
+//       "data": [184.2013, 130.664],
+//       "symbol": "diamond",
+//       "symbolSize": 8,
+//       "itemStyle": {
+//         "color": "#FAC858"
+//       },
+//       "label": {
+//         "show": true,
+//         "formatter": "{c}%",
+//         "position": "top"
+//       }
+//     }
+//   ]
+// }
+// </chart-option>
+// `
+// );
+
+// console.log(content);
 
 export interface BaseModelConfig {
   model?: string;
@@ -68,19 +175,35 @@ export abstract class BaseModel<Model extends BaseChatModel> {
         },
         endMessage(content: string) {
           try {
-            // 尝试解析为JSON
-            const chartData = JSON.parse(content.trim());
+            // 首先尝试直接解析为JSON
+            const trimmedContent = content.trim();
+            // 使用正则表达式提取标签内容
+            const typeMatch = trimmedContent.match(/<chart-type>(.*?)<\/chart-type>/s);
+            const optionMatch = trimmedContent.match(/<chart-option>([\s\S]*?)<\/chart-option>/s);
+
+            const result: any = {};
+
+            if (typeMatch && typeMatch[1]) {
+              result.type = typeMatch[1].trim();
+            }
+
+            if (optionMatch && optionMatch[1]) {
+              // 直接解析JSON字符串
+              const optionStr = optionMatch[1].trim();
+              result.option = JSON.parse(optionStr);
+            }
+
             return {
               message_type: 'chart',
-              message: chartData,
-              status: 'complete'
+              message: result,
+              status: 'fulfilled'
             };
           } catch (e) {
             // 解析失败时返回原始内容
             return {
               message_type: 'chart',
               message: content,
-              status: 'complete'
+              status: 'error'
             };
           }
         }
@@ -191,7 +314,7 @@ export abstract class BaseModel<Model extends BaseChatModel> {
 
       result += content;
 
-      console.log(content);
+      console.log(result);
 
       // 推理的一般都是在最前面，并且此时不存在content，先处理
       if (reasoning_content) {

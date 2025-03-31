@@ -111,9 +111,10 @@ export function getReportChartPrompt(data: any) {
      - 提供适合的配色方案和样式设置
 
   ## Output Format:
-  1. 首先分析数据特征和可视化目标 200字左右
+  1. 首先分析数据特征和可视化目标 100字左右
   2. 推荐最适合的图表类型（1-3种），但是你不用说明理由
-  3. 对于每种推荐的图表类型，必须严格按照以下XML格式提供：
+  3. 每个图表前面你应该先介绍一下这个图表说明了什么
+  4. 对于每种推荐的图表类型，必须严格按照以下XML格式提供：
      <lilanz-chart>
      <chart-type>图表类型名称</chart-type>
      <chart-option>
@@ -122,6 +123,19 @@ export function getReportChartPrompt(data: any) {
      }
      </chart-option>
      </lilanz-chart>
+  
+  ## 重要提示：
+  1. 不要在配置中使用JavaScript函数！所有需要函数的地方（如formatter）都应该使用字符串模板代替。
+  2. 对于tooltip、label等需要格式化的地方，请使用ECharts支持的字符串模板，例如：
+     - 正确示例："formatter": "{b}: {c} ({d}%)"
+     - 错误示例：不要使用 "formatter": function(params) { return params.name + ': ' + params.value; }
+  3. 如果需要复杂的格式化，请使用ECharts支持的模板变量：
+     - {a}：系列名
+     - {b}：数据名
+     - {c}：数据值
+     - {d}：百分比（饼图）
+     - {@xxx}：维度名为'xxx'的值
+  4. 所有配置必须是有效的JSON格式，不能包含JavaScript函数或表达式。
   
   ## Examples:
   
@@ -280,6 +294,55 @@ export function getReportChartPrompt(data: any) {
   </chart-option>
   </lilanz-chart>
   
+  ### 示例4：散点图与气泡图（带格式化）
+  
+  对于需要展示多个变量关系的数据，散点图是很好的选择。
+  
+  <lilanz-chart>
+  <chart-type>scatter</chart-type>
+  <chart-option>
+  {
+    "title": {
+      "text": "销售额与折扣率关系分析",
+      "left": "center"
+    },
+    "tooltip": {
+      "trigger": "item",
+      "formatter": "{a} <br/>{b} <br/>折扣率: {@discount}% <br/>销售额: {@sales}万元 <br/>利润: {@profit}万元"
+    },
+    "xAxis": {
+      "type": "value",
+      "name": "折扣率(%)"
+    },
+    "yAxis": {
+      "type": "value",
+      "name": "销售额(万元)"
+    },
+    "series": [
+      {
+        "name": "销售数据",
+        "type": "scatter",
+        "symbolSize": function (data) {
+          return data[2] / 5;
+        },
+        "encode": {
+          "x": "discount",
+          "y": "sales",
+          "tooltip": ["discount", "sales", "profit"]
+        },
+        "data": [
+          [10, 100, 60],
+          [15, 120, 65],
+          [20, 150, 70],
+          [25, 200, 80],
+          [30, 300, 90]
+        ]
+      }
+    ]
+  }
+  </chart-option>
+  </lilanz-chart>
+  
   ## Constraints:
   1. 严格基于提供的数据进行分析，不得臆测或编造不存在的数据
   2. 图表选择必须与用户问题和数据特征高度相关
@@ -289,5 +352,6 @@ export function getReportChartPrompt(data: any) {
   6. 配色方案应专业、和谐，并考虑数据可视化的清晰度
   7. 对于复杂数据，应考虑提供多种可视化方案供选择
   8. 必须严格按照指定的XML格式输出图表配置，标签名称必须完全匹配：<lilanz-chart>、<chart-type>和<chart-option>
+  9. 绝对不要在配置中使用JavaScript函数，所有需要函数的地方都使用ECharts支持的字符串模板
   `;
 }

@@ -7,14 +7,10 @@ import { join } from 'node:path';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 
-import { CSVLoader } from '@langchain/community/document_loaders/fs/csv';
-import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
-import { HuggingFaceEmbedding } from '@/core/embedding-engines';
 import { RAGSystem } from '@/core/rag-system';
-import { getModelsDir, getTestDataDir } from '@/utils/path';
+import { getTestDataDir } from '@/utils/path';
 
 // import { mylinkList } from './data';
 import { TransformService } from './transform.service';
