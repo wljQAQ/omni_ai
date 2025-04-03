@@ -6,14 +6,21 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 
-import { SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+
+import { BaseModel, ModelProvider } from '@/core/models';
 
 import { ReportAnalysisService } from './analysis.service';
 import { getReportChartPrompt } from './prompt';
 
 @Controller('ai/report-analysis')
 export class ReportAnalysisController {
-  constructor(private readonly service: ReportAnalysisService) {}
+  model: BaseModel<BaseChatModel>;
+  constructor(
+    private readonly service: ReportAnalysisService,
+    private readonly modelProvider: ModelProvider
+  ) {}
 
   @Post('analyze')
   @ApiOperation({ summary: '分析报表数据' })
@@ -192,5 +199,196 @@ export class ReportAnalysisController {
     //     ]
     //   };
     // }
+  }
+
+  @Post('complete')
+  async complete(@Res() res, @Body() body: { model: string; messages: HumanMessage[] }) {
+    // 设置 SSE 相关的响应头
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const vision_model = 'qwen-vl-max';
+    const text_model = 'deepseek-r1';
+
+    const model = this.modelProvider.getBaseModel('deepseek', {
+      model: text_model
+    });
+
+    const prompt = new SystemMessage({
+      content: `你是一个专业、友好、有帮助的AI助手。请根据用户的问题提供准确、有用的回答。
+  回答时请保持简洁明了，避免不必要的冗长。如果不确定或不知道答案，请诚实地说明，不要编造信息。并且用中文回答`
+    });
+
+    const mockMessage = new HumanMessage({
+      content: [
+        {
+          type: 'text',
+          text: '你是一位专业的产品经理，你会根据用户提供的参考网页的屏幕截图，来构建一个需求文档\n- 确保需求给到研发之后能完全实现和屏幕截图完全一致\n- !重要:密切关注布局和排列方式、背景颜色、文字颜色、字体大小、字体、填充、边距、边框等，颜色和尺寸完全匹配，并给出每个模块的准确的尺寸细节和精确颜色值（用十六进制表示，如#986ee2）等信息\n- 使用屏幕截图中的准确文字\n- 产品功能和逻辑细节也要清楚\n- !!特别重要：注意不要生成代码，只生成需求，而且需求中不包含截图，所以需求里面需要有具体的设计细节，但一定不要有技术细节，以便研发可以只根据需求来完成高保真的实现\n根据图片尽可能的还原设计图'
+        },
+        {
+          type: 'image_url',
+          image_url: {
+            url: 'https://7463-tcb-advanced-a656fc-1257967285.tcb.qcloud.la/weda-uploader/copilot/yb0qdphtl1kdry4hkb8or6?sign=c09ddda0f0aa14853caa73a4d722f3f0&t=1743660931'
+          }
+        }
+      ]
+    });
+
+    const vuemock = new HumanMessage({
+      content: [
+        {
+          type: '上传了一张图片'
+        },
+        {
+          type: 'text',
+          text: `识别的图片内容为：
+1. 页面布局
+整体布局：页面分为顶部、主要内容区域和底部三个部分。
+顶部：包含一个头像图标、标题文字和两个功能按钮（搜索和更多选项）。
+主要内容区域：分为左右两列，左侧为“Hot Topics”，右侧为“Design Guide”。
+底部：包含两个标签按钮，分别是“Hot Topics”和“Design Guide”。
+2. 颜色和字体
+背景颜色：#FFFFFF
+文字颜色：
+标题文字：#333333
+子标题文字：#666666
+按钮文字：#333333
+字体：
+标题文字：Arial, sans-serif, 24px
+子标题文字：Arial, sans-serif, 18px
+按钮文字：Arial, sans-serif, 16px
+3. 具体模块尺寸和位置
+头部
+
+宽度：100%
+高度：70px
+头像图标：左上角，宽度50px，高度50px
+标题文字：头像右侧，垂直居中对齐
+功能按钮：右上角，宽度50px，高度50px，间距10px
+主要内容区域
+
+左侧“Hot Topics”
+宽度：48%
+高度：自适应
+边框：1px solid #ECECEC
+内边距：20px
+子标题：宽度100%，高度50px，垂直居中对齐
+按钮：宽度100%，高度50px，垂直居中对齐，间距10px
+右侧“Design Guide”
+宽度：48%
+高度：自适应
+边框：1px solid #ECECEC
+内边距：20px
+子标题：宽度100%，高度50px，垂直居中对齐
+按钮：宽度100%，高度50px，垂直居中对齐，间距10px
+底部
+
+宽度：100%
+高度：50px
+标签按钮：宽度48%，高度50px，垂直居中对齐，间距10px
+4. 功能描述
+搜索按钮：点击后弹出搜索框，用户可以输入关键词进行搜索。
+更多选项按钮：点击后展开更多功能选项。
+Hot Topics：展示热门话题，点击子标题或按钮跳转到对应内容页面。
+Design Guide：展示设计指南，点击子标题或按钮跳转到对应内容页面。
+5. 注意事项
+所有按钮和文字的颜色、字体大小、边距等需严格按照上述要求实现。
+确保页面在不同分辨率下都能保持良好的显示效果。`
+        }
+      ]
+    });
+
+    const mockprompt = new HumanMessage({
+      content: [
+        {
+          type: 'text',
+          text: `你是一位资深的Vue3和ElementPlus专家开发者。请根据以下详细的产品需求文档，生成完整的Vue3+ElementPlus实现代码。
+
+产品需求文档:
+"""
+1. 页面布局
+整体布局：页面分为顶部、主要内容区域和底部三个部分。
+顶部：包含一个头像图标、标题文字和两个功能按钮（搜索和更多选项）。
+主要内容区域：分为左右两列，左侧为"Hot Topics"，右侧为"Design Guide"。
+底部：包含两个标签按钮，分别是"Hot Topics"和"Design Guide"。
+
+2. 颜色和字体
+背景颜色：#FFFFFF
+文字颜色：
+标题文字：#333333
+子标题文字：#666666
+按钮文字：#333333
+字体：
+标题文字：Arial, sans-serif, 24px
+子标题文字：Arial, sans-serif, 18px
+按钮文字：Arial, sans-serif, 16px
+
+3. 具体模块尺寸和位置
+头部
+宽度：100%
+高度：70px
+头像图标：左上角，宽度50px，高度50px
+标题文字：头像右侧，垂直居中对齐
+功能按钮：右上角，宽度50px，高度50px，间距10px
+
+主要内容区域
+左侧"Hot Topics"
+宽度：48%
+高度：自适应
+边框：1px solid #ECECEC
+内边距：20px
+子标题：宽度100%，高度50px，垂直居中对齐
+按钮：宽度100%，高度50px，垂直居中对齐，间距10px
+
+右侧"Design Guide"
+宽度：48%
+高度：自适应
+边框：1px solid #ECECEC
+内边距：20px
+子标题：宽度100%，高度50px，垂直居中对齐
+按钮：宽度100%，高度50px，垂直居中对齐，间距10px
+
+底部
+宽度：100%
+高度：50px
+标签按钮：宽度48%，高度50px，垂直居中对齐，间距10px
+
+4. 功能描述
+搜索按钮：点击后弹出搜索框，用户可以输入关键词进行搜索。
+更多选项按钮：点击后展开更多功能选项。
+Hot Topics：展示热门话题，点击子标题或按钮跳转到对应内容页面。
+Design Guide：展示设计指南，点击子标题或按钮跳转到对应内容页面。
+"""
+
+请提供以下文件的完整实现代码：
+1. 主组件（App.vue）
+2. 必要的子组件（Header.vue, Content.vue, Footer.vue等）
+3. 路由配置（如果需要）
+4. 任何必要的工具函数或状态管理
+
+要求：
+1. 代码必须使用Vue3的Composition API
+2. 使用ElementPlus组件库的组件实现UI
+3. 严格按照产品需求文档中的颜色、尺寸、布局规范实现
+4. 所有功能（头部、内容区域、底部）都应在同一个Vue文件中实现
+5. 代码结构应清晰，使用适当的CSS变量和命名来保持可维护性
+6. 提供适当的注释说明关键逻辑
+7. 确保在不同设备上有良好的响应式表现
+
+请生成一个完整的、可直接使用的单文件组件代码，包含<template>、<script setup>和<style>部分。`
+        }
+      ]
+    });
+
+    model.enhancedStreamChat([prompt, mockprompt], {
+      onMessage: message => {
+        res.write(`data: ${JSON.stringify(message)}\n\n`);
+      },
+      onFinish: () => {
+        console.log('finish');
+        res.end();
+      }
+    });
   }
 }

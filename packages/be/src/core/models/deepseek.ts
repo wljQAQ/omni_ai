@@ -10,14 +10,14 @@ export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOption
   createModel() {
     console.log(process.env.SILICONFLOW_BASE_URL, process.env.SILICONFLOW_API_KEY);
     const model = new ChatDeepSeek({
-      modelName: 'deepseek-ai/DeepSeek-V3',
-      temperature: 0.2,
+      modelName: this.config.model || 'deepseek-v3',
+      temperature: 0.7,
       configuration: {
-        // baseURL: process.env.DEEPSEEK_BASE_URL
-        baseURL: process.env.SILICONFLOW_BASE_URL
+        baseURL: process.env.DEEPSEEK_BASE_URL
+        // baseURL: process.env.SILICONFLOW_BASE_URL
       },
-      // apiKey: process.env.DEEPSEEK_API_KEY
-      apiKey: process.env.SILICONFLOW_API_KEY
+      apiKey: process.env.DEEPSEEK_API_KEY
+      // apiKey: process.env.SILICONFLOW_API_KEY
     });
 
     return model;
