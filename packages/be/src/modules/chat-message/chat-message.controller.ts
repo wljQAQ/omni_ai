@@ -24,6 +24,12 @@ export class ChatMessageController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
+    const chatflowStep = [
+      {
+        model: 'qwen-vl-max'
+      }
+    ];
+
     const model = this.modelProvider.getBaseModel('deepseek', {
       model: body.model || 'qwen-vl-max'
     });
@@ -37,13 +43,13 @@ export class ChatMessageController {
         });
       } else {
         return new HumanMessage({
-          content: [...i.content, ...(i?.context || [])]
+          content: [i]
         });
       }
     });
 
     const id = uuidv4();
-
+    console.log(id, 'id');
     model.enhancedStreamChat({
       id,
       messages: [...messages, new HumanMessage({ content: body.query })],
@@ -64,10 +70,9 @@ export class ChatMessageController {
           // );
         },
         onError: error => {
-          console.log(error, 'error');
           const response = {
             message: error.message,
-            event: error.name === 'AbortError' ? 'message_stop' : 'error',
+            event: error.message === 'Aborted' ? 'message_stop' : 'error',
             task_id: id
           };
 

@@ -164,17 +164,17 @@ export class ReportAnalysisController {
       content: getReportChartPrompt(data)
     });
 
-    model.enhancedStreamChat([prompt], {
-      onMessage: message => {
-        console.log(message, 'message');
+    // model.enhancedStreamChat([prompt], {
+    //   onMessage: message => {
+    //     console.log(message, 'message');
 
-        res.write(`data: ${JSON.stringify(message)}\n\n`);
-      },
-      onFinish: () => {
-        console.log('finish');
-        res.end();
-      }
-    });
+    //     res.write(`data: ${JSON.stringify(message)}\n\n`);
+    //   },
+    //   onFinish: () => {
+    //     console.log('finish');
+    //     res.end();
+    //   }
+    // });
     // const { stream, model } = await this.service.analyzeReport(columns, rows, '分析一下当前报表');
 
     // for await (const chunk of stream) {
@@ -314,14 +314,14 @@ Design Guide：展示设计指南，点击子标题或按钮跳转到对应内�
       }
     });
 
-    model.enhancedStreamChat([...messages], {
-      onMessage: message => {
-        res.write(`data: ${JSON.stringify(message)}\n\n`);
-      },
-      onFinish: () => {
-        console.log('finish');
-        res.end();
-      }
-    });
+    // model.enhancedStreamChat([...messages], {
+    //   onMessage: message => {
+    //     res.write(`data: ${JSON.stringify(message)}\n\n`);
+    //   },
+    //   onFinish: () => {
+    //     console.log('finish');
+    //     res.end();
+    //   }
+    // });
   }
 }

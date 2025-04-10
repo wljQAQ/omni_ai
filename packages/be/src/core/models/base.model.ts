@@ -4,7 +4,8 @@
 
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { XMLParser } from 'fast-xml-parser';
+
+// import { XMLParser } from 'fast-xml-parser';
 
 // const xmlParser = new XMLParser({
 //   trimValues: true
@@ -125,6 +126,7 @@ export abstract class BaseModel<Model extends BaseChatModel> {
 
   constructor(config?: BaseModelConfig) {
     this.config = config || {};
+    this.streamAbortMap = new Map();
   }
 
   abstract createModel(): Model;
@@ -354,6 +356,8 @@ export abstract class BaseModel<Model extends BaseChatModel> {
       let result = '';
       // 主处理循环
       for await (const chunk of stream) {
+        // if (abortController.signal.aborted) return;
+
         // 处理推理内容
         const reasoning_content = chunk.additional_kwargs?.reasoning_content;
 
@@ -415,7 +419,6 @@ export abstract class BaseModel<Model extends BaseChatModel> {
     } catch (error) {
       callbacks?.onError?.(error as Error);
     } finally {
-      console.log('finally');
       this.streamAbortMap.delete(id);
     }
   }
