@@ -23,7 +23,7 @@ export class ChatMessageController {
     private readonly chatFlowService: ChatflowService
   ) {}
 
-  @Post('complete')
+  @Post('complete2')
   async complete(@Res() res, @Body() body: { model: string; query: string; context: any[] }) {
     // 设置 SSE 相关的响应头
     res.setHeader('Content-Type', 'text/event-stream');
@@ -62,11 +62,7 @@ export class ChatMessageController {
       }
     });
 
-    this.chatflowService.executeFlow({
-      steps: chatflowStep,
-      query: body.query,
-      context: messages
-    });
+    this.chatFlowService.executeFlow(chatflowStep, body.query, messages, res);
 
     const model = this.modelProvider.getBaseModel('deepseek', {
       model: body.model || 'qwen-vl-max'

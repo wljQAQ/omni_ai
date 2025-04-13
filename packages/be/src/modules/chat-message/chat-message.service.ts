@@ -138,8 +138,8 @@ export class ChatflowService {
             this.sendSseMessage(res, {
               event: 'message',
               task_id: context.flowId,
-              stepId: step.id,
-              chunk: message
+              step,
+              message
             });
           },
           onError: error => {
@@ -168,7 +168,7 @@ export class ChatflowService {
     if (step.contextTemplate) {
       // 编译模板
       const template = Handlebars.compile(step.contextTemplate);
-
+      console.log(template, 'template');
       // 准备模板数据
       const templateData = {
         query: context.query,
