@@ -175,7 +175,7 @@ export abstract class BaseModel<Model extends BaseChatModel> {
         signal: abortController.signal
       });
 
-      const bufferSize = 10; // 保持一个合理的缓冲区大小
+      const bufferSize = 50; // 保持一个合理的缓冲区大小
 
       // 内置的一些格式
       const formatDetectors = [

@@ -8,7 +8,6 @@ import { BaseModel } from './base.model';
 //@ts-ignore
 export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOptions>> {
   createModel() {
-    console.log(process.env.SILICONFLOW_BASE_URL, process.env.SILICONFLOW_API_KEY);
     const model = new ChatDeepSeek({
       modelName: this.config.model || 'deepseek-v3',
       temperature: 0.7,

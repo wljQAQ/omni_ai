@@ -11,7 +11,7 @@ import { TransformModule } from './modules/code-transform/transform.module';
 import { ReportAnalysisModule } from './modules/report-analysis/analysis.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), ModelModule, TransformModule, ChatDbModule, ReportAnalysisModule, ChatMessageModule],
+  imports: [ConfigModule.forRoot(), ModelModule, ChatMessageModule],
   controllers: [AppController],
   providers: [AppService]
 })

@@ -23,7 +23,7 @@ export class ChatMessageService {
 }
 
 /**
- * 流程步骤定义接口
+ * 流程步骤定义接口  参考dify
  */
 export interface FlowStep {
   id: string; // 步骤唯一标识
@@ -37,7 +37,7 @@ export interface FlowStep {
 export class ChatflowService {
   constructor(private readonly modelProvider: ModelProvider) {}
 
-  async executeFlow(steps: FlowStep[], query: string, context: any[] = [], res: Response): Promise<void> {
+  async executeFlow(steps: FlowStep[], query: string, context: any[] = [], res: Response, setModel: any): Promise<void> {
     const flowId = uuidv4();
 
     // 准备流程上下文
@@ -53,7 +53,7 @@ export class ChatflowService {
       event: 'flow_start',
       flow_id: flowId,
       totalSteps: steps.length,
-      steps: steps.map(s => ({ id: s.id, title: s.title }))
+      steps: steps
     });
 
     try {
@@ -72,13 +72,15 @@ export class ChatflowService {
             step_id: stepId,
             title: step.title,
             current: stepNumber,
-            total: steps.length
+            total: steps.length,
+            status: 'processing'
           }
         });
 
         try {
           // 执行单个步骤
-          const output = await this.executeStep(step, flowContext, res);
+          const output = await this.executeStep(step, flowContext, res, setModel);
+          console.log(output, 'output');
 
           // 更新上下文
           flowContext.outputs[step.id] = output;
@@ -91,7 +93,8 @@ export class ChatflowService {
               id: step.id,
               title: step.title,
               current: stepNumber,
-              total: steps.length
+              total: steps.length,
+              status: 'success'
             }
           });
         } catch (error) {
@@ -101,7 +104,8 @@ export class ChatflowService {
             task_id: flowId,
             step: {
               id: step.id,
-              title: step.title
+              title: step.title,
+              status: 'error'
             },
             error: error.message
           });
@@ -109,13 +113,21 @@ export class ChatflowService {
           throw error; // 重新抛出错误以中断流程
         }
       }
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      // 发送步骤开始通知
+      this.sendSseMessage(res, {
+        event: 'flow_end',
+        flow_id: flowId,
+        steps
+      });
+    }
   }
 
   /**
    * 执行单个流程步骤
    */
-  private async executeStep(step: FlowStep, context: any, res: Response): Promise<string> {
+  private async executeStep(step: FlowStep, context: any, res: Response, setModel: any): Promise<string> {
     return new Promise((resolve, reject) => {
       // 构建消息上下文
       const messages = this.buildStepContext(step, context);
@@ -123,22 +135,29 @@ export class ChatflowService {
 
       // 获取模型
       const model = this.modelProvider.getBaseModel('deepseek', { model: step.model });
-      const stepId = uuidv4();
+
+      console.log(messages, 'messages');
+
+      setModel(model);
+      const uuid = uuidv4();
 
       // 执行模型流式调用
       model.enhancedStreamChat({
-        id: stepId,
+        id: uuid,
         messages,
         callbacks: {
           onMessage: message => {
             // 累积完整输出
-            fullOutput += message;
+            if (message.message_type === 'text') fullOutput += message.message;
 
             // 发送消息更新
             this.sendSseMessage(res, {
               event: 'message',
-              task_id: context.flowId,
-              step,
+              task_id: uuid,
+              step: {
+                ...step,
+                status: 'processing'
+              },
               message
             });
           },
@@ -168,7 +187,6 @@ export class ChatflowService {
     if (step.contextTemplate) {
       // 编译模板
       const template = Handlebars.compile(step.contextTemplate);
-      console.log(template, 'template');
       // 准备模板数据
       const templateData = {
         query: context.query,
@@ -190,6 +208,7 @@ export class ChatflowService {
 
       // 渲染模板
       const content = template(templateData);
+
       messages.push(new HumanMessage({ content }));
     } else {
       // 添加初始上下文
