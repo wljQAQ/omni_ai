@@ -153,26 +153,25 @@ export abstract class BaseModel<Model extends BaseChatModel> {
   async enhancedStreamChat({
     id,
     messages,
-    callbacks
+    callbacks,
+    signal
   }: {
     id: string;
     messages: Array<HumanMessage | SystemMessage>;
     callbacks?: {
       onMessage: (message: any) => void;
-      onFinish?: () => void;
+      onFinish?: (metadata: any) => void;
       onError?: (error: Error) => void;
     };
+    signal?: AbortSignal;
   }) {
+    let metadata = {};
+
     try {
-      const abortController = new AbortController();
-
-      this.streamAbortMap.set(id, abortController);
-
       const model = this.createModel();
-
       this.model = model;
       const stream = await model.stream(messages, {
-        signal: abortController.signal
+        signal
       });
 
       const bufferSize = 50; // 保持一个合理的缓冲区大小
@@ -354,9 +353,12 @@ export abstract class BaseModel<Model extends BaseChatModel> {
       };
 
       let result = '';
+
       // 主处理循环
       for await (const chunk of stream) {
         // if (abortController.signal.aborted) return;
+
+        metadata = chunk.response_metadata;
 
         // 处理推理内容
         const reasoning_content = chunk.additional_kwargs?.reasoning_content;
@@ -370,7 +372,8 @@ export abstract class BaseModel<Model extends BaseChatModel> {
         if (reasoning_content) {
           callbacks?.onMessage({
             message_type: 'reasoning',
-            message: reasoning_content
+            message: reasoning_content,
+            metadata
           });
           continue;
         }
@@ -399,7 +402,8 @@ export abstract class BaseModel<Model extends BaseChatModel> {
           callbacks?.onMessage({
             message_type: 'text',
             message: sendText,
-            status: 'complete'
+            status: 'complete',
+            metadata
           });
           contentBuffer = contentBuffer.substring(contentBuffer.length - bufferSize);
         }
@@ -413,20 +417,11 @@ export abstract class BaseModel<Model extends BaseChatModel> {
           status: 'complete'
         });
       }
-
-      // 调用完成回调
-      callbacks?.onFinish?.();
     } catch (error) {
       callbacks?.onError?.(error as Error);
     } finally {
-      this.streamAbortMap.delete(id);
-    }
-  }
-
-  streamAbort(id: string) {
-    const abortController = this.streamAbortMap.get(id);
-    if (abortController) {
-      abortController.abort();
+      // 调用完成回调
+      callbacks?.onFinish?.(metadata);
     }
   }
 }

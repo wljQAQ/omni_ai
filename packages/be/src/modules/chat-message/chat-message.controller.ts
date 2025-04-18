@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BaseModel, ModelProvider } from '@/core/models';
 
 import { ChatflowService, ChatMessageService, FlowStep } from './chat-message.service';
+import { SessionManagerService } from './session-manager.service';
 
 @Controller('ai/chat-message')
 export class ChatMessageController {
@@ -20,7 +21,8 @@ export class ChatMessageController {
   constructor(
     private readonly modelProvider: ModelProvider,
     private readonly chatMessageService: ChatMessageService,
-    private readonly chatFlowService: ChatflowService
+    private readonly chatFlowService: ChatflowService,
+    private readonly sessionManager: SessionManagerService
   ) {}
 
   // @Post('complete2')
@@ -123,7 +125,7 @@ export class ChatMessageController {
       model: string;
       query: string;
       context: any[];
-      chatflow?: FlowStep[]; // 可选的流程步骤定义
+      chatflow?: FlowStep[];
     }
   ) {
     // 设置 SSE 响应头
@@ -142,14 +144,62 @@ export class ChatMessageController {
 
     // 判断是否使用chatflow模式
     if (body.chatflow && body.chatflow.length > 0) {
-      // 使用流程化处理
-      await this.chatFlowService.executeFlow(body.chatflow, body.query, initialMessages, res, model => {
-        this.model = model;
-      });
+      // 使用流程化处理，通过回调处理SSE
+      await this.chatFlowService.executeFlow(
+        body.chatflow, 
+        body.query, 
+        initialMessages,
+        {
+          onStepStart: (stepInfo) => {
+            this.sendSseMessage(res, {
+              event: 'step_start',
+              ...stepInfo
+            });
+          },
+          onStepEnd: (stepInfo) => {
+            this.sendSseMessage(res, {
+              event: 'step_end',
+              ...stepInfo
+            });
+          },
+          onMessage: (message) => {
+            this.sendSseMessage(res, {
+              event: 'message',
+              ...message
+            });
+          },
+          onError: (error) => {
+            this.sendSseMessage(res, {
+              event: 'error',
+              ...error
+            });
+          },
+          onFlowStart: (flowInfo) => {
+            this.sendSseMessage(res, {
+              event: 'flow_start',
+              ...flowInfo
+            });
+          },
+          onFlowEnd: (flowInfo) => {
+            this.sendSseMessage(res, {
+              event: 'flow_end',
+              ...flowInfo
+            });
+            res.end(); // 结束响应
+          }
+        }
+      );
     } else {
       // 使用普通问答模式
       await this.handleNormalChat(body.model, body.query, initialMessages, res);
     }
+  }
+  
+  /**
+   * 发送SSE消息的辅助方法
+   */
+  private sendSseMessage(res: Response, data: any): void {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
   }
 
   /**
@@ -191,11 +241,12 @@ export class ChatMessageController {
 
           res.write(`data: ${JSON.stringify(response)}\n\n`);
         },
-        onFinish: () => {
+        onFinish: metadata => {
           res.write(
             `data: ${JSON.stringify({
               event: 'finish',
-              task_id: id
+              task_id: id,
+              metadata
             })}\n\n`
           );
           res.end();

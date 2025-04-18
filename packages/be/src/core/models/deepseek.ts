@@ -15,7 +15,8 @@ export class DeepseekModel extends BaseModel<ChatDeepSeek<ChatDeepSeekCallOption
         baseURL: process.env.DEEPSEEK_BASE_URL
         // baseURL: process.env.SILICONFLOW_BASE_URL
       },
-      apiKey: process.env.DEEPSEEK_API_KEY
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      streamUsage: true
       // apiKey: process.env.SILICONFLOW_API_KEY
     });
 

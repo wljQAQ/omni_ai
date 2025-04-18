@@ -37,7 +37,19 @@ export interface FlowStep {
 export class ChatflowService {
   constructor(private readonly modelProvider: ModelProvider) {}
 
-  async executeFlow(steps: FlowStep[], query: string, context: any[] = [], res: Response, setModel: any): Promise<void> {
+  async executeFlow(
+    steps: FlowStep[], 
+    query: string, 
+    context: any[] = [],
+    callbacks: {
+      onStepStart: (stepInfo: any) => void;
+      onStepEnd: (stepInfo: any) => void;
+      onMessage: (message: any) => void;
+      onError: (error: any) => void;
+      onFlowStart: (flowInfo: any) => void;
+      onFlowEnd: (flowInfo: any) => void;
+    }
+  ): Promise<void> {
     const flowId = uuidv4();
 
     // 准备流程上下文
@@ -49,8 +61,7 @@ export class ChatflowService {
     };
 
     // 发送流程开始通知
-    this.sendSseMessage(res, {
-      event: 'flow_start',
+    callbacks.onFlowStart({
       flow_id: flowId,
       totalSteps: steps.length,
       steps: steps
@@ -60,12 +71,10 @@ export class ChatflowService {
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
         const stepNumber = i + 1;
-
         const stepId = uuidv4();
 
         // 发送步骤开始通知
-        this.sendSseMessage(res, {
-          event: 'step_start',
+        callbacks.onStepStart({
           flow_id: flowId,
           step: {
             id: step.id,
@@ -79,15 +88,13 @@ export class ChatflowService {
 
         try {
           // 执行单个步骤
-          const output = await this.executeStep(step, flowContext, res, setModel);
-          console.log(output, 'output');
+          const output = await this.executeStep(step, flowContext, callbacks);
 
           // 更新上下文
           flowContext.outputs[step.id] = output;
 
           // 发送步骤完成通知
-          this.sendSseMessage(res, {
-            event: 'step_end',
+          callbacks.onStepEnd({
             task_id: flowId,
             step: {
               id: step.id,
@@ -99,8 +106,7 @@ export class ChatflowService {
           });
         } catch (error) {
           // 发送步骤错误通知
-          this.sendSseMessage(res, {
-            event: 'step_error',
+          callbacks.onError({
             task_id: flowId,
             step: {
               id: step.id,
@@ -114,61 +120,63 @@ export class ChatflowService {
         }
       }
     } catch (error) {
+      // 错误处理
     } finally {
-      // 发送步骤开始通知
-      this.sendSseMessage(res, {
-        event: 'flow_end',
+      // 发送流程结束通知
+      callbacks.onFlowEnd({
         flow_id: flowId,
         steps
       });
     }
   }
 
-  /**
-   * 执行单个流程步骤
-   */
-  private async executeStep(step: FlowStep, context: any, res: Response, setModel: any): Promise<string> {
-    return new Promise((resolve, reject) => {
+  private async executeStep(
+    step: FlowStep, 
+    context: any,
+    callbacks: { onMessage: (message: any) => void; onError: (error: any) => void }
+  ): Promise<string> {
+    return new Promise(async (resolve, reject) => {
       // 构建消息上下文
       const messages = this.buildStepContext(step, context);
       let fullOutput = '';
 
       // 获取模型
       const model = this.modelProvider.getBaseModel('deepseek', { model: step.model });
-
-      console.log(messages, 'messages');
-
-      setModel(model);
-      const uuid = uuidv4();
-
-      // 执行模型流式调用
-      model.enhancedStreamChat({
-        id: uuid,
-        messages,
-        callbacks: {
-          onMessage: message => {
-            // 累积完整输出
-            if (message.message_type === 'text') fullOutput += message.message;
-
-            // 发送消息更新
-            this.sendSseMessage(res, {
-              event: 'message',
-              task_id: uuid,
-              step: {
-                ...step,
-                status: 'processing'
-              },
-              message
-            });
-          },
-          onError: error => {
-            reject(error);
-          },
-          onFinish: () => {
-            resolve(fullOutput);
+      const abortController = new AbortController();
+      
+      try {
+        // 执行模型流式调用
+        await model.enhancedStreamChat({
+          id: uuidv4(),
+          messages,
+          signal: abortController.signal,
+          callbacks: {
+            onMessage: message => {
+              // 累积完整输出
+              if (message.message_type === 'text') fullOutput += message.message;
+              
+              // 通过回调发送消息
+              callbacks.onMessage({
+                step: {
+                  ...step,
+                  status: 'processing'
+                },
+                message
+              });
+            },
+            onError: error => {
+              callbacks.onError(error);
+              reject(error);
+            },
+            onFinish: () => {
+              resolve(fullOutput);
+            }
           }
-        }
-      });
+        });
+      } catch (error) {
+        callbacks.onError(error);
+        reject(error);
+      }
     });
   }
 
@@ -233,12 +241,5 @@ export class ChatflowService {
     }
 
     return messages;
-  }
-
-  /**
-   * 发送SSE消息
-   */
-  private sendSseMessage(res: Response, data: any): void {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
   }
 }
